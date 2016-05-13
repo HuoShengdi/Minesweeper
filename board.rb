@@ -122,10 +122,10 @@ class Board
     self[pos].reveal
   end
 
-  def reveal_all(pos)
+  def reveal_all
     grid.each do |row|
       row.each do |column|
-        reveal(pos)
+        column.reveal
       end
     end
   end

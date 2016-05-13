@@ -15,11 +15,13 @@ class Minesweeper
     until game_over?
       play_turn
     end
-    @board.reveal_all
-    @board.render
     if game_won?
+      @board.reveal_all
+      @board.render
       puts "Congratulations, you win!"
     else
+      @board.reveal_all
+      @board.render
       puts "Sorry, you lose!"
     end
 
@@ -33,7 +35,7 @@ class Minesweeper
   def make_play
     pos = get_pos
     if pos.length == 3
-      place_flag(pos[0..1])
+      @board.place_flag(pos[0..1])
       return
     elsif @board.mines == 0
       @board.reveal(pos)
@@ -102,7 +104,7 @@ class Minesweeper
 
   def valid_pos?(pos)
     if pos.is_a?(Array) &&
-      ((pos.length == 2) || ((pos.length == 3) && pos.pop == "f")) &&
+      ((pos.length == 2) || ((pos.length == 3) && pos[-1] == "f")) &&
       @board.include?(pos)
       return true
     else
