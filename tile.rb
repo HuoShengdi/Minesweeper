@@ -41,10 +41,12 @@ class Tile
         "*"
       elsif @value > 0
         @value
+      else
+        "."
       end
     else
       " "
     end
   end
-  
+
 end

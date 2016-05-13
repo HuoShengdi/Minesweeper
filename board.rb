@@ -5,6 +5,7 @@ class Board
   attr_accessor :grid
   def initialize(grid)
     @grid = grid
+    @mines = 0
   end
 
   def self.generate(size = "9x9")
@@ -16,11 +17,11 @@ class Board
   end
 
   def populate(mine_num)
-    count = 0
+    @mines = 0
     while count < mine_num
       pos = [rand(0..@grid.length-1), rand(0..@grid[0].length-1)]
       place_mine(pos) if @grid[pos].mine == false
-      count += 1
+      @mines += 1
     end
   end
 
@@ -30,20 +31,35 @@ class Board
     if tile.mine == false
 
       tile.add_mine
-      next_pos = adjacent_pos(pos)
+      next_pos = adjacent_positions(pos)
       next_pos.each do |pos|
         self[pos].value = self[pos].value + 1
       end
     end
   end
 
-  def adjacent_pos(pos)
+  # def adjacent_positions(pos)
+  #   x,y = pos
+  #   adj_pos = []
+  #   @grid[x-1..x+1].each_with_index do |row, offx|
+  #     @grid[x-1 + offx][y-1..y+1].each_with_index do |t, offy|
+  #       if t && t != @grid[x][y]
+  #         adj_pos << [x - 1 + offx, y - 1 + offy]
+  #       end
+  #     end
+  #   end
+  #   adj_pos
+  # end
+
+  def adjacent_positions(pos)
     x,y = pos
     adj_pos = []
-    @grid[x-1..x+1].each_with_index do |row, offx|
-      @grid[x-1 + offx][y-1..y+1].each_with_index do |t, offy|
-        if t && t != @grid[x][y]
-          adj_pos << [x - 1 + offx, y - 1 + offy]
+    x_range = (x-1..x+1).to_a.select {|x| (0..grid.length-1).include?(x)}
+    y_range = (y-1..y+1).to_a.select {|y| (0..grid[0].length-1).include?(y)}
+    x_range.each_with_index do |i|
+      y_range.each_with_index do |j|
+        if [x,y] != [i,j]
+          adj_pos << [i,j]
         end
       end
     end
@@ -65,7 +81,7 @@ class Board
   def tile_search(pos)
     self[pos].reveal
     if self[pos].value == 0
-      adjacent_pos(pos).each do |adj_pos|
+      adjacent_positions(pos).each do |adj_pos|
         tile_search(adj_pos) if self[adj_pos].revealed? == false
       end
     end
@@ -88,5 +104,11 @@ class Board
     tile.value = val
   end
 
+  def max_mines
+    (@grid.length * @grid[0].length)/2
+  end
 
+  def min_mines
+    @grid.length
+  end
 end
