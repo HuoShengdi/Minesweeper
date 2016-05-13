@@ -27,27 +27,27 @@ class Board
   def place_mine(pos)
     x,y = pos
     tile = @grid[x][y]
-    if tile.mine == true
-      break
-    end
-    tile.add_mine
-    next_tiles = adjacent_tiles(pos)
-    next_tiles.each do |t|
-      t.value = t.value + 1
+    if tile.mine == false
+
+      tile.add_mine
+      next_pos = adjacent_pos(pos)
+      next_pos.each do |pos|
+        self[pos].value = self[pos].value + 1
+      end
     end
   end
 
-  def adjacent_tiles(pos)
+  def adjacent_pos(pos)
     x,y = pos
-    adj_tiles = []
-    @grid[x-1..x+1].each_with_index do |row, offset|
-      @grid[x-1 + offset][y-1..y+1].each do |t|
+    adj_pos = []
+    @grid[x-1..x+1].each_with_index do |row, offx|
+      @grid[x-1 + offx][y-1..y+1].each_with_index do |t, offy|
         if t && t != @grid[x][y]
-          adj_tiles << t
+          adj_pos << [x - 1 + offx, y - 1 + offy]
         end
       end
     end
-    adj_tiles
+    adj_pos
   end
 
   def render
@@ -59,11 +59,16 @@ class Board
       end
       puts "#{i} #{row_display.join(" ")}"
     end
+    nil
   end
 
-  def tile_search
-
-
+  def tile_search(pos)
+    self[pos].reveal
+    if self[pos].value == 0
+      adjacent_pos(pos).each do |adj_pos|
+        tile_search(adj_pos) if self[adj_pos].revealed? == false
+      end
+    end
   end
 
   def place_flag(pos)

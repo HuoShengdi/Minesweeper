@@ -15,6 +15,10 @@ class Tile
     @revealed = true
   end
 
+  def revealed?
+    @revealed
+  end
+
   def flag
     if @flag
       @flag = false
@@ -32,12 +36,15 @@ class Tile
   end
 
   def display_value
-    if @mine == true
-      "*"
-    elsif @value > 0
-      @value
+    if @revealed == true
+      if @mine == true
+        "*"
+      elsif @value > 0
+        @value
+      end
     else
       " "
     end
   end
+  
 end
