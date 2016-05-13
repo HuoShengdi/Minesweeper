@@ -1,5 +1,5 @@
 require_relative "board"
-
+require 'byebug'
 class Minesweeper
 
   def initialize(board)
@@ -15,6 +15,7 @@ class Minesweeper
     until game_over?
       play_turn
     end
+    @board.reveal_all
     @board.render
     if game_won?
       puts "Congratulations, you win!"
@@ -25,7 +26,20 @@ class Minesweeper
   end
 
   def play_turn
-    
+    @board.render
+    make_play
+  end
+
+  def make_play
+    pos = get_pos
+    if pos.length == 3
+      place_flag(pos[0..1])
+      return
+    elsif @board.mines == 0
+      @board.reveal(pos)
+      @board.populate(@mine_count)
+    end
+    @board.tile_search(pos)
   end
 
   def get_pos
@@ -73,7 +87,12 @@ class Minesweeper
   end
 
   def parse_pos(pos)
-    pos.split(",").map! { |char| Integer(char) }
+    chars = pos.split(",")
+    option = []
+    if chars.length == 3
+      option << chars.pop
+    end
+    chars.map! { |char| Integer(char) } + option
   end
 
   def valid_count?(count)
@@ -83,14 +102,21 @@ class Minesweeper
 
   def valid_pos?(pos)
     if pos.is_a?(Array) &&
-      pos.length == 2 &&
-      pos.all? { |x| (0..board.size - 1).include?(x) }
+      ((pos.length == 2) || ((pos.length == 3) && pos.pop == "f")) &&
+      @board.include?(pos)
       return true
     else
       false
+    end
   end
 
+  def game_over?
+    @board.solved? || @board.mine_hit?
+  end
 
+  def game_won?
+    @board.solved?
+  end
 
 end
 
@@ -101,3 +127,4 @@ if __FILE__ == $PROGRAM_NAME
 
   game = Minesweeper.new(Board.generate(board_size))
   game.run
+end

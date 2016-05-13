@@ -3,6 +3,8 @@ require_relative "tile"
 class Board
   attr_reader :grid
   attr_accessor :grid
+  attr_accessor :mines
+
   def initialize(grid)
     @grid = grid
     @mines = 0
@@ -18,9 +20,9 @@ class Board
 
   def populate(mine_num)
     @mines = 0
-    while count < mine_num
+    while @mines < mine_num
       pos = [rand(0..@grid.length-1), rand(0..@grid[0].length-1)]
-      place_mine(pos) if @grid[pos].mine == false
+      place_mine(pos) if self[pos].mine == false && self[pos].revealed? == false
       @mines += 1
     end
   end
@@ -29,7 +31,6 @@ class Board
     x,y = pos
     tile = @grid[x][y]
     if tile.mine == false
-
       tile.add_mine
       next_pos = adjacent_positions(pos)
       next_pos.each do |pos|
@@ -67,6 +68,7 @@ class Board
   end
 
   def render
+    system("clear")
     puts "  #{(0..@grid[0].length-1).to_a.join(" ")}"
     grid.each_with_index do |row, i|
       row_display = []
@@ -79,10 +81,51 @@ class Board
   end
 
   def tile_search(pos)
-    self[pos].reveal
+    reveal(pos)
     if self[pos].value == 0
       adjacent_positions(pos).each do |adj_pos|
         tile_search(adj_pos) if self[adj_pos].revealed? == false
+      end
+    end
+  end
+
+  def solved?
+    grid.each do |row|
+      row.each do |column|
+        if column.revealed? == false && column.mine == false
+          return false
+        end
+      end
+    end
+    true
+  end
+
+  def include?(pos)
+    x,y = pos
+    (0..@grid.length - 1).to_a.include?(x) &&
+    (0..@grid[0].length - 1).to_a.include?(y)
+
+  end
+
+  def mine_hit?
+    grid.each do |row|
+      row.each do |column|
+        if column.revealed? && column.mine == true
+          return true
+        end
+      end
+    end
+    false
+  end
+
+  def reveal(pos)
+    self[pos].reveal
+  end
+
+  def reveal_all(pos)
+    grid.each do |row|
+      row.each do |column|
+        reveal(pos)
       end
     end
   end
@@ -109,6 +152,6 @@ class Board
   end
 
   def min_mines
-    @grid.length
+    (@grid.length * @grid[0].length) / @grid.length
   end
 end

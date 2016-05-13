@@ -44,6 +44,8 @@ class Tile
       else
         "."
       end
+    elsif @flag == true
+      "F"
     else
       " "
     end
